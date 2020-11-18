@@ -1,0 +1,5 @@
+-try if newer versions of torch work
+-add requirement-to-freeze
+-try different activations for last layer (hard tanh, no output?)
+-train without noise and check effects
+-write GUI
