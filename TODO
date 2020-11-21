@@ -1,12 +1,9 @@
 MODELS:
-    -try different activations for last layer (hard tanh, no output?)
-    -train without noise and check effects
+    - try different activations for last layer (hard tanh or unit)
+    - train without noise and check effects
 DEMO:
-    -add example audio files
-    -add default model to git
-    -implement playback
-    -beautify interface
+    ? add more example audio files or models
+    ? beautify interface
 PROJECT:
-    -try if newer versions of torch work
-    -check requirements
-    -add requirement-to-freeze
+    - check if python scripts work with updated requirements
+    - try if newer versions of torch work

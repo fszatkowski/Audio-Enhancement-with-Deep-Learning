@@ -1,0 +1,8 @@
+click
+librosa
+noisereduce
+pandas
+seaborn
+sounddevice
+torch==1.4.0
+tqdm
