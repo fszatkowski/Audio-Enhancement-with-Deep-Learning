@@ -1,5 +1,12 @@
--try if newer versions of torch work
--add requirement-to-freeze
--try different activations for last layer (hard tanh, no output?)
--train without noise and check effects
--write GUI
+MODELS:
+    -try different activations for last layer (hard tanh, no output?)
+    -train without noise and check effects
+DEMO:
+    -add example audio files
+    -add default model to git
+    -implement playback
+    -beautify interface
+PROJECT:
+    -try if newer versions of torch work
+    -check requirements
+    -add requirement-to-freeze

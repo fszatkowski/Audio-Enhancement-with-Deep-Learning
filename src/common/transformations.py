@@ -14,9 +14,9 @@ class Transformation(ABC):
         pass
 
 
-class WhiteNoiseUniform(Transformation):
+class UniformNoiseFull(Transformation):
     def __init__(self, apply_probability: float, amplitude: float = 0.002):
-        super(WhiteNoiseUniform, self).__init__(apply_probability)
+        super(UniformNoiseFull, self).__init__(apply_probability)
         self.max = amplitude
         self.min = -amplitude
 
@@ -25,9 +25,9 @@ class WhiteNoiseUniform(Transformation):
         return input_tensor + noise
 
 
-class GaussianNoiseUniform(Transformation):
+class GaussianNoiseFull(Transformation):
     def __init__(self, apply_probability: float, mean: float = 0.0, std: float = 0.001):
-        super(GaussianNoiseUniform, self).__init__(apply_probability)
+        super(GaussianNoiseFull, self).__init__(apply_probability)
         self.mean = mean
         self.std = std
 
@@ -36,11 +36,11 @@ class GaussianNoiseUniform(Transformation):
         return input_tensor + noise
 
 
-class WhiteNoisePartial(Transformation):
+class UniformNoisePartial(Transformation):
     def __init__(
         self, apply_probability: float, noise_percent: float, amplitude: float = 0.002
     ):
-        super(WhiteNoisePartial, self).__init__(apply_probability)
+        super(UniformNoisePartial, self).__init__(apply_probability)
         self.max = amplitude
         self.min = -amplitude
         self.noise_percent = noise_percent

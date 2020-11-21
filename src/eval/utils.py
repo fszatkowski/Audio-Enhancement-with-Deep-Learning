@@ -5,16 +5,16 @@ import noisereduce as nr
 import numpy as np
 
 from common.dataset import Dataset
-from common.transformations import (GaussianNoisePartial, GaussianNoiseUniform,
-                                    WhiteNoisePartial, WhiteNoiseUniform,
+from common.transformations import (GaussianNoiseFull, GaussianNoisePartial,
+                                    UniformNoiseFull, UniformNoisePartial,
                                     ZeroSamplesTransformation)
 
 TRANSFORMATIONS = {
     "none": None,
     "gaussian_part": GaussianNoisePartial(1, noise_percent=0.5, mean=0.0, std=0.1),
-    "gaussian_uni": GaussianNoiseUniform(1, mean=0.0, std=0.1),
-    "white_part": WhiteNoisePartial(1, noise_percent=0.5, amplitude=0.1),
-    "white_uni": WhiteNoiseUniform(1, amplitude=0.1),
+    "gaussian_uni": GaussianNoiseFull(1, mean=0.0, std=0.1),
+    "white_part": UniformNoisePartial(1, noise_percent=0.5, amplitude=0.1),
+    "white_uni": UniformNoiseFull(1, amplitude=0.1),
     "zero_001": ZeroSamplesTransformation(1, noise_percent=0.01),
     "zero_002": ZeroSamplesTransformation(1, noise_percent=0.02),
     "zero_005": ZeroSamplesTransformation(1, noise_percent=0.05),
