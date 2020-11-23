@@ -4,6 +4,8 @@ from typing import Tuple, Union
 import numpy as np
 import torch
 
+Tensor = Union[torch.Tensor, np.array]
+
 
 class Transformation(ABC):
     @abstractmethod
@@ -11,9 +13,7 @@ class Transformation(ABC):
         self.apply_probability = apply_probability
 
     @abstractmethod
-    def apply(
-        self, input_tensor: Union[np.array, torch.Tensor]
-    ) -> Union[np.array, torch.Tensor]:
+    def apply(self, input_tensor: Tensor) -> Tensor:
         pass
 
 
@@ -23,13 +23,10 @@ class UniformNoiseFull(Transformation):
         self.max = amplitude
         self.min = -amplitude
 
-    def apply(
-        self, input_tensor: Union[np.array, torch.Tensor]
-    ) -> Union[np.array, torch.Tensor]:
-        noise = uniform(input_tensor.shape, self.min, self.max)
-        if isinstance(input_tensor, np.ndarray):
-            return input_tensor + noise.numpy()
-        return input_tensor + noise
+    def apply(self, input_tensor: Tensor) -> Tensor:
+        return add_uniform_noise(
+            input_tensor=input_tensor, min_val=self.min, max_val=self.max
+        )
 
 
 class GaussianNoiseFull(Transformation):
@@ -38,13 +35,10 @@ class GaussianNoiseFull(Transformation):
         self.mean = mean
         self.std = std
 
-    def apply(
-        self, input_tensor: Union[np.array, torch.Tensor]
-    ) -> Union[np.array, torch.Tensor]:
-        noise = normal(input_tensor.shape, self.mean, self.std)
-        if isinstance(input_tensor, np.ndarray):
-            return input_tensor + noise.numpy()
-        return input_tensor + noise
+    def apply(self, input_tensor: Tensor) -> Tensor:
+        return add_gaussian_noise(
+            input_tensor=input_tensor, mean=self.mean, std=self.std
+        )
 
 
 class UniformNoisePartial(Transformation):
@@ -56,15 +50,13 @@ class UniformNoisePartial(Transformation):
         self.min = -amplitude
         self.noise_percent = noise_percent
 
-    def apply(
-        self, input_tensor: Union[np.array, torch.Tensor]
-    ) -> Union[np.array, torch.Tensor]:
-        noise = uniform(input_tensor.shape, self.min, self.max) * random_mask(
-            input_tensor.shape, self.noise_percent
+    def apply(self, input_tensor: Tensor) -> Tensor:
+        return add_uniform_noise(
+            input_tensor=input_tensor,
+            min_val=self.min,
+            max_val=self.max,
+            noise_percent=self.noise_percent,
         )
-        if isinstance(input_tensor, np.ndarray):
-            return input_tensor + noise.numpy()
-        return input_tensor + noise
 
 
 class GaussianNoisePartial(Transformation):
@@ -80,15 +72,13 @@ class GaussianNoisePartial(Transformation):
         self.std = std
         self.noise_percent = noise_percent
 
-    def apply(
-        self, input_tensor: Union[np.array, torch.Tensor]
-    ) -> Union[np.array, torch.Tensor]:
-        noise = normal(input_tensor.shape, self.mean, self.std) * random_mask(
-            input_tensor.shape, self.noise_percent
+    def apply(self, input_tensor: Tensor) -> Tensor:
+        return add_gaussian_noise(
+            input_tensor=input_tensor,
+            mean=self.mean,
+            std=self.std,
+            noise_percent=self.noise_percent,
         )
-        if isinstance(input_tensor, np.ndarray):
-            return input_tensor + noise.numpy()
-        return input_tensor + noise
 
 
 class ZeroSamplesTransformation(Transformation):
@@ -96,22 +86,74 @@ class ZeroSamplesTransformation(Transformation):
         super(ZeroSamplesTransformation, self).__init__(apply_probability)
         self.noise_percent = noise_percent
 
-    def apply(
-        self, input_tensor: Union[np.array, torch.Tensor]
-    ) -> Union[np.array, torch.Tensor]:
-        mask = random_mask(input_tensor.shape, self.noise_percent)
-        if isinstance(input_tensor, np.ndarray):
-            return input_tensor + mask.numpy()
-        return input_tensor * mask
+    def apply(self, input_tensor: Tensor) -> Tensor:
+        return set_value(
+            input_tensor=input_tensor, percent_affected=self.noise_percent, value=0
+        )
 
 
-def normal(shape: Tuple[int], mean: float, std: float) -> torch.Tensor:
-    return torch.empty(shape).normal_(mean=mean, std=std)
+class ImpulseNoiseTransformation(Transformation):
+    def __init__(
+        self, apply_probability: float, impulse_value: float, noise_percent: float
+    ):
+        super(ImpulseNoiseTransformation, self).__init__(apply_probability)
+        self.impulse_value = impulse_value
+        self.noise_percent = noise_percent
+
+    def apply(self, input_tensor: Tensor) -> Tensor:
+        negative_amplitude = set_value(
+            input_tensor=input_tensor,
+            percent_affected=self.noise_percent / 2,
+            value=-self.impulse_value,
+        )
+        return set_value(
+            input_tensor=negative_amplitude,
+            percent_affected=self.noise_percent / 2,
+            value=self.impulse_value,
+        )
 
 
-def uniform(shape: Tuple[int], min_val: float, max_val: float) -> torch.Tensor:
-    return (max_val - min_val) * torch.rand(shape) - min_val
+def add_gaussian_noise(
+    input_tensor: Tensor, mean: float, std: float, noise_percent: float = 1.0
+) -> Tensor:
+    noise = torch.empty(input_tensor.shape).normal_(mean=mean, std=std)
+    noise = apply_random_mask(noise, noise_percent)
+    if isinstance(input_tensor, torch.Tensor):
+        return input_tensor + noise
+    elif isinstance(input_tensor, np.ndarray):
+        return (torch.Tensor(input_tensor) + noise).numpy()
 
 
-def random_mask(shape: Tuple[int], percent: float) -> torch.Tensor:
-    return (torch.rand(shape) <= percent).type(torch.int32)
+def add_uniform_noise(
+    input_tensor: Tensor, min_val: float, max_val: float, noise_percent: float = 1.0
+) -> Tensor:
+    noise = (max_val - min_val) * torch.rand(input_tensor.shape) - min_val
+    noise = apply_random_mask(noise, noise_percent)
+    if isinstance(input_tensor, torch.Tensor):
+        return input_tensor + noise
+    elif isinstance(input_tensor, np.ndarray):
+        return (torch.Tensor(input_tensor) + noise).numpy()
+
+
+def apply_random_mask(noise: Tensor, percent: float) -> Tensor:
+    if percent < 1.0:
+        return noise * (torch.rand(noise.shape) <= percent).type(torch.int32)
+    else:
+        return noise
+
+
+def set_value(input_tensor: Tensor, percent_affected: float, value: float) -> Tensor:
+    convert_to_torch = isinstance(input_tensor, torch.Tensor)
+    if convert_to_torch:
+        input_tensor = input_tensor.numpy()
+    input_tensor = input_tensor.copy()
+    indices = np.random.choice(
+        np.arange(input_tensor.size),
+        replace=False,
+        size=int(input_tensor.size * percent_affected),
+    )
+    indices = np.unravel_index(indices, input_tensor.shape)
+    input_tensor[indices] = value
+    if convert_to_torch:
+        return torch.Tensor(input_tensor)
+    return input_tensor
