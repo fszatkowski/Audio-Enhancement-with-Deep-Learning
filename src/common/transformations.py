@@ -13,49 +13,62 @@ class Transformation(ABC):
         self.apply_probability = apply_probability
 
     @abstractmethod
-    def apply(self, input_tensor: Tensor) -> Tensor:
+    def _apply(self, input_tensor: Tensor) -> Tensor:
         pass
+
+    def apply(self, input_tensor: Tensor) -> Tensor:
+        tensor = self._apply(input_tensor)
+
+        if isinstance(tensor, torch.Tensor):
+            return torch.clip(tensor, -1, 1)
+        elif isinstance(tensor, np.ndarray):
+            return np.clip(tensor, -1, 1)
 
 
 class UniformNoiseFull(Transformation):
-    def __init__(self, apply_probability: float, amplitude: float = 0.002):
+    def __init__(self, apply_probability: float, max_amplitude: float = 0.002):
         super(UniformNoiseFull, self).__init__(apply_probability)
-        self.max = amplitude
-        self.min = -amplitude
+        self.amplitude = torch.distributions.Uniform(0, max_amplitude)
 
-    def apply(self, input_tensor: Tensor) -> Tensor:
+    def _apply(self, input_tensor: Tensor) -> Tensor:
+        amplitude = self.amplitude.sample()
         return add_uniform_noise(
-            input_tensor=input_tensor, min_val=self.min, max_val=self.max
+            input_tensor=input_tensor, min_val=-amplitude, max_val=amplitude
         )
 
 
 class GaussianNoiseFull(Transformation):
-    def __init__(self, apply_probability: float, mean: float = 0.0, std: float = 0.001):
+    def __init__(
+        self, apply_probability: float, mean: float = 0.0, max_std: float = 0.001
+    ):
         super(GaussianNoiseFull, self).__init__(apply_probability)
         self.mean = mean
-        self.std = std
+        self.std = torch.distributions.Uniform(0, max_std)
 
-    def apply(self, input_tensor: Tensor) -> Tensor:
+    def _apply(self, input_tensor: Tensor) -> Tensor:
         return add_gaussian_noise(
-            input_tensor=input_tensor, mean=self.mean, std=self.std
+            input_tensor=input_tensor, mean=self.mean, std=self.std.sample()
         )
 
 
 class UniformNoisePartial(Transformation):
     def __init__(
-        self, apply_probability: float, noise_percent: float, amplitude: float = 0.002
+        self,
+        apply_probability: float,
+        max_noise_percent: float,
+        max_amplitude: float = 0.002,
     ):
         super(UniformNoisePartial, self).__init__(apply_probability)
-        self.max = amplitude
-        self.min = -amplitude
-        self.noise_percent = noise_percent
+        self.amplitude = torch.distributions.Uniform(0, max_amplitude)
+        self.noise_percent = torch.distributions.Uniform(0, max_noise_percent)
 
-    def apply(self, input_tensor: Tensor) -> Tensor:
+    def _apply(self, input_tensor: Tensor) -> Tensor:
+        amplitude = self.amplitude.sample()
         return add_uniform_noise(
             input_tensor=input_tensor,
-            min_val=self.min,
-            max_val=self.max,
-            noise_percent=self.noise_percent,
+            min_val=-amplitude,
+            max_val=amplitude,
+            noise_percent=self.noise_percent.sample(),
         )
 
 
@@ -63,53 +76,60 @@ class GaussianNoisePartial(Transformation):
     def __init__(
         self,
         apply_probability: float,
-        noise_percent: float,
+        max_noise_percent: float,
         mean: float = 0.0,
-        std: float = 0.001,
+        max_std: float = 0.001,
     ):
         super(GaussianNoisePartial, self).__init__(apply_probability)
         self.mean = mean
-        self.std = std
-        self.noise_percent = noise_percent
+        self.std = torch.distributions.Uniform(0, max_std)
+        self.noise_percent = torch.distributions.Uniform(0, max_noise_percent)
 
-    def apply(self, input_tensor: Tensor) -> Tensor:
+    def _apply(self, input_tensor: Tensor) -> Tensor:
         return add_gaussian_noise(
             input_tensor=input_tensor,
             mean=self.mean,
-            std=self.std,
-            noise_percent=self.noise_percent,
+            std=self.std.sample(),
+            noise_percent=self.noise_percent.sample(),
         )
 
 
 class ZeroSamplesTransformation(Transformation):
-    def __init__(self, apply_probability: float, noise_percent: float):
+    def __init__(self, apply_probability: float, max_noise_percent: float):
         super(ZeroSamplesTransformation, self).__init__(apply_probability)
-        self.noise_percent = noise_percent
+        self.noise_percent = torch.distributions.Uniform(0, max_noise_percent)
 
-    def apply(self, input_tensor: Tensor) -> Tensor:
+    def _apply(self, input_tensor: Tensor) -> Tensor:
         return set_value(
-            input_tensor=input_tensor, percent_affected=self.noise_percent, value=0
+            input_tensor=input_tensor,
+            percent_affected=self.noise_percent.sample(),
+            value=0,
         )
 
 
 class ImpulseNoiseTransformation(Transformation):
     def __init__(
-        self, apply_probability: float, impulse_value: float, noise_percent: float
+        self,
+        apply_probability: float,
+        max_impulse_value: float,
+        max_noise_percent: float,
     ):
         super(ImpulseNoiseTransformation, self).__init__(apply_probability)
-        self.impulse_value = impulse_value
-        self.noise_percent = noise_percent
+        self.impulse_value = torch.distributions.Uniform(0, max_impulse_value)
+        self.noise_percent = torch.distributions.Uniform(0, max_noise_percent)
 
-    def apply(self, input_tensor: Tensor) -> Tensor:
+    def _apply(self, input_tensor: Tensor) -> Tensor:
+        impulse_value = self.impulse_value.sample()
+        noise_percent = self.noise_percent.sample()
         negative_amplitude = set_value(
             input_tensor=input_tensor,
-            percent_affected=self.noise_percent / 2,
-            value=-self.impulse_value,
+            percent_affected=noise_percent / 2,
+            value=-impulse_value,
         )
         return set_value(
             input_tensor=negative_amplitude,
-            percent_affected=self.noise_percent / 2,
-            value=self.impulse_value,
+            percent_affected=noise_percent / 2,
+            value=impulse_value,
         )
 
 

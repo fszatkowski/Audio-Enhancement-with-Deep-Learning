@@ -346,7 +346,7 @@ class Demo:
             self.current_noisy_audio = self.current_orig_audio
         elif noise == "Gaussian":
             self.current_noisy_audio = GaussianNoisePartial(
-                apply_probability=1, mean=mean, std=std, noise_percent=noise_perc
+                apply_probability=1, mean=mean, std=std, max_noise_percent=noise_perc
             ).apply(self.current_orig_audio)
         elif noise == "Uniform":
             self.current_noisy_audio = UniformNoisePartial(

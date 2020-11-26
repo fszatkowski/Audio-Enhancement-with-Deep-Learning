@@ -1,12 +1,7 @@
 from random import randint
 from typing import Dict, Sequence
 
-import torch
-
-from common.transformations import (GaussianNoiseFull, GaussianNoisePartial,
-                                    Transformation, UniformNoiseFull,
-                                    UniformNoisePartial,
-                                    ZeroSamplesTransformation)
+from common.transformations import *
 
 
 class TransformationsManager:
@@ -51,44 +46,59 @@ class TransformationsManager:
     @staticmethod
     def get_transformations(transformations_type: str) -> Sequence[Transformation]:
         if transformations_type == "gaussian_part":
-            return [GaussianNoisePartial(0.35, noise_percent=0.5, mean=0.0, std=0.1)]
+            return [
+                GaussianNoisePartial(0.35, max_noise_percent=0.5, mean=0.0, max_std=0.1)
+            ]
         elif transformations_type == "white_part":
-            return [UniformNoisePartial(0.35, noise_percent=0.5, amplitude=0.1)]
+            return [UniformNoisePartial(0.35, max_noise_percent=0.5, max_amplitude=0.1)]
         if transformations_type == "gaussian_uni":
-            return [GaussianNoiseFull(0.35, mean=0.0, std=0.1)]
+            return [GaussianNoiseFull(0.35, mean=0.0, max_std=0.1)]
         elif transformations_type == "white_uni":
-            return [UniformNoiseFull(0.35, amplitude=0.1)]
+            return [UniformNoiseFull(0.35, max_amplitude=0.1)]
         elif transformations_type == "zero":
-            return [ZeroSamplesTransformation(0.35, noise_percent=0.05)]
+            return [ZeroSamplesTransformation(0.35, max_noise_percent=0.05)]
         elif transformations_type == "zero_002":
-            return [ZeroSamplesTransformation(0.35, noise_percent=0.02)]
+            return [ZeroSamplesTransformation(0.35, max_noise_percent=0.02)]
         elif transformations_type == "zero_001":
-            return [ZeroSamplesTransformation(0.35, noise_percent=0.01)]
+            return [ZeroSamplesTransformation(0.35, max_noise_percent=0.01)]
         elif transformations_type == "mix":
             return [
-                GaussianNoisePartial(0.1, noise_percent=0.5, mean=0.0, std=0.1),
-                GaussianNoiseFull(0.1, mean=0.0, std=0.1),
-                UniformNoisePartial(0.1, noise_percent=0.5, amplitude=0.1),
-                UniformNoiseFull(0.1, amplitude=0.1),
-                ZeroSamplesTransformation(0.1, noise_percent=0.01),
+                GaussianNoisePartial(0.1, max_noise_percent=0.5, mean=0.0, max_std=0.1),
+                GaussianNoiseFull(0.1, mean=0.0, max_std=0.1),
+                UniformNoisePartial(0.1, max_noise_percent=0.5, max_amplitude=0.1),
+                UniformNoiseFull(0.1, max_amplitude=0.1),
+                ZeroSamplesTransformation(0.1, max_noise_percent=0.01),
             ]
         elif transformations_type == "mix_no_zero":
             return [
-                GaussianNoisePartial(0.1, noise_percent=0.5, mean=0.0, std=0.1),
-                GaussianNoiseFull(0.1, mean=0.0, std=0.1),
-                UniformNoisePartial(0.1, noise_percent=0.5, amplitude=0.1),
-                UniformNoiseFull(0.1, amplitude=0.1),
+                GaussianNoisePartial(0.1, max_noise_percent=0.5, mean=0.0, max_std=0.1),
+                GaussianNoiseFull(0.1, mean=0.0, max_std=0.1),
+                UniformNoisePartial(0.1, max_noise_percent=0.5, max_amplitude=0.1),
+                UniformNoiseFull(0.1, max_amplitude=0.1),
             ]
         elif transformations_type == "mix_weaker_zero":
             return [
-                GaussianNoisePartial(0.1, noise_percent=0.5, mean=0.0, std=0.1),
-                GaussianNoiseFull(0.1, mean=0.0, std=0.1),
-                UniformNoisePartial(0.1, noise_percent=0.5, amplitude=0.1),
-                UniformNoiseFull(0.1, amplitude=0.1),
-                ZeroSamplesTransformation(0.1, noise_percent=0.001),
+                GaussianNoisePartial(0.1, max_noise_percent=0.5, mean=0.0, max_std=0.1),
+                GaussianNoiseFull(0.1, mean=0.0, max_std=0.1),
+                UniformNoisePartial(0.1, max_noise_percent=0.5, max_amplitude=0.1),
+                UniformNoiseFull(0.1, max_amplitude=0.1),
+                ZeroSamplesTransformation(0.1, max_noise_percent=0.001),
             ]
-        elif transformations_type == "none":
+        elif transformations_type == "full":
             return []
+        elif transformations_type == "default":
+            return [
+                GaussianNoisePartial(
+                    0.25, max_noise_percent=1.0, mean=0.0, max_std=0.15
+                ),
+                GaussianNoiseFull(0.1, mean=0.0, max_std=0.15),
+                UniformNoisePartial(0.25, max_noise_percent=1.0, max_amplitude=0.15),
+                UniformNoiseFull(0.1, max_amplitude=0.15),
+                ZeroSamplesTransformation(0.15, max_noise_percent=0.05),
+                ImpulseNoiseTransformation(
+                    0.15, max_noise_percent=0.05, max_impulse_value=0.15
+                ),
+            ]
         else:
             raise ValueError(
                 f"Specified transformations config: {transformations_type} not supported."

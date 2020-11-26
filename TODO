@@ -1,9 +1,8 @@
 MODELS:
-    - try different activations for last layer (hard tanh or unit)
-    - train without noise and check effects
+    - add warmup to training
+    - add max_applied parameter to TransformationManager
 DEMO:
     ? add more example audio files or models
-    ? beautify interface
+    ? make interface prettier
 PROJECT:
-    - check if python scripts work with updated requirements
-    - try if newer versions of torch work
+    - add tests for whole training pipeline, maybe check if torch 1.7 works for everything

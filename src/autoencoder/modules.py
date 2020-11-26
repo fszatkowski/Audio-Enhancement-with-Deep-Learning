@@ -150,12 +150,12 @@ class OutputModule(torch.nn.Module):
         self.conv = torch.nn.Conv2d(
             input_channels, 1, kernel_size=(1, 1), stride=(1, 1)
         )
-        self.tanh = torch.nn.Tanh()
+        self.out = torch.nn.Hardtanh()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.upsample(x)
         x = self.conv(x)
-        return self.tanh(x)
+        return self.out(x)
 
 
 class Swish(torch.nn.Module):
