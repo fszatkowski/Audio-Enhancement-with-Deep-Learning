@@ -1,5 +1,6 @@
 MODELS:
     - check if dataset sampling online works (eg. load only random files for each epoch)
+    - learning rate decay ?
 DEMO:
     ? add more example audio files or models
     ? make interface prettier
