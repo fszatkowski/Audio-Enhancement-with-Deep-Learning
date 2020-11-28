@@ -27,8 +27,9 @@ def train_model(
     print("\nStarting training.")
 
     training_summary = TrainingSummary.get(train_loader.batch_size, metadata, gan)
-    for epoch in range(metadata.current_epoch, metadata.epochs):
+    for i, epoch in enumerate(range(metadata.current_epoch, metadata.epochs)):
         # train on whole train set
+        train_loader.tm_active = (i >= metadata.warmup_epochs)
         for batch_ctr, batch in enumerate(tqdm(train_loader, desc=f"Epoch {epoch}.")):
             for mini_batch in batch:
                 batch_loss = wrapper.train_step(mini_batch)

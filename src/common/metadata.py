@@ -23,8 +23,9 @@ class Metadata:
     val_files: int = constants.VAL_FILES
     current_epoch: int = 0
 
-    # data settings
+    # training settings
     batch_size: int = constants.BATCH_SIZE
+    warmup_epochs: int = 0
 
     input_sr: int = constants.INPUT_SR
     target_sr: int = constants.TARGET_SR
@@ -35,6 +36,7 @@ class Metadata:
 
     training_steps: int = 0
     save_every_n_steps: int = constants.SAVE_EVERY_N_STEPS
+    max_transformations_applied: int = 1
 
     training_finished: bool = False
     last_saved: str = str(datetime.now())

@@ -5,8 +5,10 @@ from common.transformations import *
 
 
 class TransformationsManager:
-    def __init__(self, transformations: Sequence[Transformation]):
+    def __init__(self, transformations: Sequence[Transformation], max_transformations_applied: int = 1):
         self.transformations = transformations
+        self.max_transformations_applied = max_transformations_applied
+
         self.transformations_count = {
             transformation.__class__.__name__: 0
             for transformation in self.transformations
@@ -14,13 +16,15 @@ class TransformationsManager:
         self.transformations_count["NoTransformation"] = 0
 
     def apply_transformations(self, tensor: torch.Tensor) -> torch.Tensor:
-        transformed = False
+        transformed_count = 0
         for t in self.transformations:
             if torch.rand(1) < t.apply_probability:
                 tensor = t.apply(tensor)
                 self.transformations_count[t.__class__.__name__] += 1
-                transformed = True
-        if not transformed:
+                transformed_count += 1
+                if transformed_count == self.max_transformations_applied:
+                    break
+        if not transformed_count:
             self.transformations_count["NoTransformation"] += 1
         return tensor
 

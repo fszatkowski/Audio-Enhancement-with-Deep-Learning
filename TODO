@@ -1,6 +1,5 @@
 MODELS:
-    - add warmup to training
-    - add max_applied parameter to TransformationManager
+    - check if dataset sampling online works (eg. load only random files for each epoch)
 DEMO:
     ? add more example audio files or models
     ? make interface prettier

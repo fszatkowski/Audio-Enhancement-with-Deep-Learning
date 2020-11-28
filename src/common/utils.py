@@ -49,7 +49,7 @@ def create_data_loaders(
 
     if transformations is not None:
         for loader in loaders:
-            loader.set_transformations_manager(TransformationsManager(transformations))
+            loader.set_transformations_manager(TransformationsManager(transformations, metadata.max_transformations_applied))
 
     return loaders
 

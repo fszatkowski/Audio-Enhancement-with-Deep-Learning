@@ -32,9 +32,11 @@ class DataLoader(data.DataLoader):
         self.collate_fn = self._collate_fn
         self.train_gan = train_gan
         self.tm: Optional[TransformationsManager] = None
+        self.tm_active = False
 
     def set_transformations_manager(self, tm: TransformationsManager):
         self.tm = tm
+        self.tm_active = True
 
     def _collate_fn(
         self, raw_data: Sequence[Dict[str, List[torch.Tensor]]]
@@ -53,7 +55,7 @@ class DataLoader(data.DataLoader):
                 else:
                     yield inputs, targets, distribution_targets
             else:
-                if self.tm is not None:
+                if self.tm is not None and self.tm_active:
                     inputs = self.tm.apply_transformations(inputs)
 
                 if torch.cuda.is_available():
