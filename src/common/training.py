@@ -178,6 +178,6 @@ def run_overfit(metadata: Metadata, model_wrapper: ModelWrapper, model_type: Mod
 
 def print_cuda_info():
     if torch.cuda.is_available():
-        print("Using GPU.")
+        print(f"Using GPU: {torch.cuda.get_device_name()}.")
     else:
         print("Using CPU.")
