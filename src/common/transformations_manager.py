@@ -41,11 +41,21 @@ class TransformationsManager:
     def get_info(self) -> Dict[str, Dict]:
         return {
             "transformations": {
-                transformation.__class__.__name__: transformation.__dict__
+                transformation.__class__.__name__: self.get_dict(transformation)
                 for transformation in self.transformations
             },
             "transformations_count": self.transformations_count,
         }
+
+    @staticmethod
+    def get_dict(transformation: Transformation) -> Dict:
+        output_dict = {}
+        for key, value in transformation.__dict__.items():
+            if isinstance(value, torch.distributions.uniform.Uniform):
+                output_dict[key] = (float(value.low), float(value.high))
+            else:
+                output_dict[key] = value
+        return output_dict
 
     @staticmethod
     def get_transformations(transformations_type: str) -> Sequence[Transformation]:
