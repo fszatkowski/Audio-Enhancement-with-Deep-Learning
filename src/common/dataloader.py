@@ -14,11 +14,12 @@ class DataLoader(data.DataLoader):
         self,
         metadata: Metadata,
         dataset: Dataset,
+        batch_size: int = 1,
         num_workers: int = NUM_WORKERS,
         train_gan: bool = False,
     ):
         super(DataLoader, self).__init__(
-            dataset, metadata.batch_size, shuffle=True, num_workers=num_workers
+            dataset, batch_size, shuffle=True, num_workers=num_workers
         )
 
         self.metadata = metadata
