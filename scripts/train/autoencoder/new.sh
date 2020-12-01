@@ -12,9 +12,9 @@ for seed in ${SEEDS}; do
       --warmup_epochs 10 \
       --patience 20 \
       --batch_size 64 \
-      --train_files 512 \
-      --test_files 128 \
-      --val_files 128 \
+      --train_files 704 \
+      --test_files 32 \
+      --val_files 32 \
       --save_every_n_steps 100 \
       --transformations "default" \
       --max_transformations_applied 2 \
