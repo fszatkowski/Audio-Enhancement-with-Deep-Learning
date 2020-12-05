@@ -23,10 +23,11 @@ def test_train():
         kernel_size=3,
         multiplier=2,
         activation="prelu",
-        norm="batch_norm")
+        norm="batch_norm",
+    )
     train(metadata)
     shutil.rmtree(test_dir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_train()

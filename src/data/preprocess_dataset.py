@@ -11,8 +11,12 @@ from data.utils import load_file
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument("--input_file_list", "-i", type=str, default=RAW_DATASET_FILELIST)
-    parser.add_argument("--output_dir", "-o", type=str, default=PREPROCESSED_DATASET_DIR)
+    parser.add_argument(
+        "--input_file_list", "-i", type=str, default=RAW_DATASET_FILELIST
+    )
+    parser.add_argument(
+        "--output_dir", "-o", type=str, default=PREPROCESSED_DATASET_DIR
+    )
     parser.add_argument("--batch_size", "-b", type=int, default=1)
     parser.add_argument("--num_files", "-f", type=int, default=0)
     return parser.parse_args()

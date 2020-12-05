@@ -5,7 +5,11 @@ from common.transformations import *
 
 
 class TransformationsManager:
-    def __init__(self, transformations: Sequence[Transformation], max_transformations_applied: int = 1):
+    def __init__(
+        self,
+        transformations: Sequence[Transformation],
+        max_transformations_applied: int = 1,
+    ):
         self.transformations = transformations
         self.max_transformations_applied = max_transformations_applied
 

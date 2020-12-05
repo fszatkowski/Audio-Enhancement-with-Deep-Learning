@@ -33,14 +33,21 @@ def create_data_loaders(
 
     if model == ModelType.Autoencoder or model == ModelType.WaveNet:
         loaders = (
-            DataLoader(metadata=metadata, dataset=train_set, batch_size=metadata.batch_size),
+            DataLoader(
+                metadata=metadata, dataset=train_set, batch_size=metadata.batch_size
+            ),
             DataLoader(metadata=metadata, dataset=val_set, batch_size=1),
             DataLoader(metadata=metadata, dataset=test_set, batch_size=1),
         )
 
     elif model == ModelType.SEGAN:
         loaders = (
-            DataLoader(metadata=metadata, dataset=train_set, batch_size=metadata.batch_size, train_gan=True),
+            DataLoader(
+                metadata=metadata,
+                dataset=train_set,
+                batch_size=metadata.batch_size,
+                train_gan=True,
+            ),
             DataLoader(metadata=metadata, dataset=val_set, batch_size=1),
             DataLoader(metadata=metadata, dataset=test_set, batch_size=1),
         )
@@ -49,7 +56,11 @@ def create_data_loaders(
 
     if transformations is not None:
         for loader in loaders:
-            loader.set_transformations_manager(TransformationsManager(transformations, metadata.max_transformations_applied))
+            loader.set_transformations_manager(
+                TransformationsManager(
+                    transformations, metadata.max_transformations_applied
+                )
+            )
 
     return loaders
 

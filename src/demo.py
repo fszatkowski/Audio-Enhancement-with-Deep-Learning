@@ -306,8 +306,7 @@ class Demo:
             metadata = json.load(f)
         return AudioProcessor(metadata, batch_size=1)
 
-    @staticmethod
-    def on_save_audio_button_clicked(audio: Optional[np.array], sr: int):
+    def on_save_audio_button_clicked(self, audio: Optional[np.array], sr: int):
         save_file = tk.filedialog.askopenfilename(initialdir=self.AUDIO_DIR)
         if audio is None:
             tk.messagebox.showinfo(
@@ -345,19 +344,36 @@ class Demo:
         if noise == "No noise":
             self.current_noisy_audio = self.current_orig_audio
         elif noise == "Gaussian":
-            self.current_noisy_audio = GaussianNoisePartial(
-                apply_probability=1, mean=mean, std=std, max_noise_percent=noise_perc
-            ).apply(self.current_orig_audio)
+            self.current_noisy_audio = add_gaussian_noise(
+                input_tensor=self.current_orig_audio,
+                mean=mean,
+                std=std,
+                noise_percent=noise_perc,
+            )
         elif noise == "Uniform":
-            self.current_noisy_audio = UniformNoisePartial(
-                apply_probability=1, amplitude=amplitude, noise_percent=noise_perc
-            ).apply(self.current_orig_audio)
+            self.current_noisy_audio = add_uniform_noise(
+                input_tensor=self.current_orig_audio,
+                min_val=-amplitude,
+                max_val=amplitude,
+                noise_percent=noise_perc,
+            )
         elif noise == "Impulse":
-            tk.messagebox.showinfo("Error", "Not implemented yet")
+            self.current_noisy_audio = set_value(
+                input_tensor=self.current_orig_audio,
+                percent_affected=noise_perc / 2,
+                value=amplitude,
+            )
+            self.current_noisy_audio = set_value(
+                input_tensor=self.current_noisy_audio,
+                percent_affected=noise_perc / 2,
+                value=amplitude,
+            )
         elif noise == "Zero mask":
-            self.current_noisy_audio = ZeroSamplesTransformation(
-                apply_probability=1, noise_percent=noise_perc
-            ).apply(self.current_orig_audio)
+            self.current_noisy_audio = set_value(
+                input_tensor=self.current_orig_audio,
+                percent_affected=noise_perc,
+                value=0,
+            )
 
     @staticmethod
     def _validate_value(
@@ -380,7 +396,7 @@ class Demo:
         sd.play(data=audio.T, samplerate=sr)
 
     @staticmethod
-    def on_stop_playback_button_clicked(self):
+    def on_stop_playback_button_clicked():
         sd.stop()
 
 

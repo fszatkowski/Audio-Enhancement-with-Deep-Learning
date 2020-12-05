@@ -29,7 +29,7 @@ def train_model(
     training_summary = TrainingSummary.get(train_loader.batch_size, metadata, gan)
     for i, epoch in enumerate(range(metadata.current_epoch, metadata.epochs)):
         # train on whole train set
-        use_transformations = (i >= metadata.warmup_epochs)
+        use_transformations = i >= metadata.warmup_epochs
         train_loader.tm_active = use_transformations
         val_loader.tm_active = use_transformations
 
