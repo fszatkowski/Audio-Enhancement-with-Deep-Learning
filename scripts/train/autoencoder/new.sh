@@ -25,5 +25,5 @@ for seed in ${SEEDS}; do
       --random_seed ${seed} \
       --activation "prelu" \
       --norm batch_norm \
-      --model_dir "models/autoencoder/new_${seed}"
+      --model_dir "models/autoencoder/new_b_${seed}"
 done
