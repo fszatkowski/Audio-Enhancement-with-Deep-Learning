@@ -8,9 +8,9 @@ SEEDS=${1-"111 1111 11111"}
 
 for seed in ${SEEDS}; do
     python3 src/autoencoder/train.py \
-      --epochs 20 \
+      --epochs 30 \
       --warmup_epochs 10 \
-      --patience 20 \
+      --patience 30 \
       --batch_size 64 \
       --train_files 704 \
       --test_files 32 \
@@ -18,8 +18,8 @@ for seed in ${SEEDS}; do
       --save_every_n_steps 100 \
       --transformations "default" \
       --max_transformations_applied 2 \
-      --learning_rate 0.001 \
-      --num_layers 5 \
+      --learning_rate 0.0005 \
+      --num_layers 7 \
       --channels 16 \
       --kernel_size 15 \
       --random_seed ${seed} \
