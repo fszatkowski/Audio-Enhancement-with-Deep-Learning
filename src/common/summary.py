@@ -10,6 +10,8 @@ from common.metadata import Metadata
 class TrainingSummary:
     def __init__(self, batch_size: int, metadata: Metadata):
         self.batch_size = batch_size
+        self.warmup_epochs = metadata.warmup_epochs
+        self.current_epoch = metadata.current_epoch
 
         if hasattr(metadata, "val_losses"):
             self.val_losses: List[float] = metadata.val_losses
@@ -49,12 +51,16 @@ class TrainingSummary:
         self._add_training_epoch(epoch)
         self.ctr = 0
 
-    def add_val_loss(self, val_loss: float):
+    def add_epoch_val_loss(self, val_loss: float):
         self.val_losses.append(val_loss)
         print(f"{str(datetime.now())}: Validation loss: {val_loss}\n")
+        self.current_epoch = self.current_epoch + 1
 
     def val_loss_improved(self) -> bool:
-        return self.val_losses[-1] <= min(self.val_losses)
+        if len(self.val_losses) <= self.warmup_epochs:
+            return True
+        else:
+            return self.val_losses[-1] <= min(self.val_losses[self.warmup_epochs-1:])
 
     def _update_metadata(self, metadata: Metadata):
         pass

@@ -46,7 +46,7 @@ def train_model(
         val_loss = evaluate(wrapper, val_loader)
 
         training_summary.add_training_epoch(epoch)
-        training_summary.add_val_loss(val_loss)
+        training_summary.add_epoch_val_loss(val_loss)
         training_summary.update_metadata(metadata)
         metadata.train_transformations = train_loader.tm.get_info()
         metadata.val_transformations = val_loader.tm.get_info()
