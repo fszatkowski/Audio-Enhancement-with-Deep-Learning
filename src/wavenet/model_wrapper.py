@@ -23,7 +23,7 @@ class WaveNetWrapper(ModelWrapper):
         )
 
         self.prepare_for_gpu()
-        self.optimizer = torch.optim.Adam(
+        self.optimizer = torch.optim.AdamW(
             self.net.parameters(), lr=metadata.learning_rate
         )
 

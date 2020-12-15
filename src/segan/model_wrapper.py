@@ -26,10 +26,10 @@ class SEGANWrapper(ModelWrapper):
         )
 
         self.prepare_for_gpu()
-        self.g_optimizer = torch.optim.Adam(
+        self.g_optimizer = torch.optim.AdamW(
             self.net.generator.parameters(), metadata.g_lr
         )
-        self.d_optimizer = torch.optim.Adam(
+        self.d_optimizer = torch.optim.AdamW(
             self.net.discriminator.parameters(), metadata.d_lr
         )
         self.l1_weight = metadata.l1_alpha
